@@ -1,29 +1,24 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:foody/controller/cubit/home/states.dart';
 import 'package:foody/screens/6-countries/count.dart';
-import 'package:foody/screens/cubit/states.dart';
-import 'package:foody/screens/favourite/fav.dart';
 import 'package:sqflite/sqflite.dart';
-import '../../controller/MealBy__Data.dart';
-import '../../controller/Meal_Data.dart';
-import '../../model/Meal_Model.dart';
-import '../../model/MealsByCategorie_Model.dart';
-import '../../shared/network/cash_helper.dart';
-import '../../shared/components.dart';
-import '../../main.dart';
-import '../../shared/manager/string.dart';
-import '../../shared/widget/custom_drawer/home_drawer.dart';
-import '../../shared/widget/restart.dart';
-import '../3-layout/layout.dart';
-import 'dart:convert' as convert;
-import '../../shared/manager/string.dart' as key;
-import '../4-home/home_screen.dart';
-import '../5-compo/components.dart';
-import '../8-search/search.dart';
+
+import '../../../screens/4-home/home_screen.dart';
+import '../../../screens/5-compo/components.dart';
+import '../../../screens/8-search/search.dart';
+import '../../../screens/9-favourite/fav.dart';
+import '../../../shared/manager/app_methods.dart';
+import '../../../shared/manager/app_string.dart'as key;
+import '../../../shared/network/local/cash_helper.dart';
+import '../../../shared/widget/custom_drawer/home_drawer.dart';
+
+
+
+
 
 
 
@@ -68,31 +63,35 @@ class homeCubit extends Cubit<homeStates> {
   List<Widget>pages = [
     const HomeScreen(),
     const Components(),
+
     const Countries(),
     Search(),
-
+    const FavScreen(),
   ];
 
   DrawerIndex? drawerIndex;
-   changeBottom(index) {
+  changeBottom(index) {
     currentIndex = index;
 
-      switch (index) {
-        case 0:
-          drawerIndex=DrawerIndex.HOME;
-          break;
-        case 1:
-          drawerIndex=DrawerIndex.Help;
-          break;
-        case 2:
-          drawerIndex=DrawerIndex.FeedBack;
-          break;
-        case 3:
-          drawerIndex=DrawerIndex.Share;
-          break;
-        default:
-          break;
-      }
+    switch (index) {
+      case 0:
+        drawerIndex=DrawerIndex.HOME;
+        break;
+      case 1:
+        drawerIndex=DrawerIndex.Help;
+        break;
+      case 4:
+        drawerIndex=DrawerIndex.fav;
+        break;
+      case 2:
+        drawerIndex=DrawerIndex.FeedBack;
+        break;
+      case 3:
+        drawerIndex=DrawerIndex.Share;
+        break;
+      default:
+        break;
+    }
 
     emit(changeBottomNav());
   }
@@ -109,6 +108,9 @@ class homeCubit extends Cubit<homeStates> {
         case DrawerIndex.Help:
           currentIndex = 1;
           break;
+      case DrawerIndex.fav:
+      currentIndex = 4;
+      break;
         case DrawerIndex.FeedBack:
           currentIndex = 2;
           break;
@@ -195,7 +197,7 @@ class homeCubit extends Cubit<homeStates> {
   List<String>listComp = [];
 
   getComp() {
-    Timer(const Duration(seconds: 0), () {
+    Timer(const Duration(seconds: 1,milliseconds: 200), () {
       getData(
           url: 'https://www.themealdb.com/api/json/v1/1/list.php?i=list')
           .then((value) {
@@ -214,7 +216,7 @@ class homeCubit extends Cubit<homeStates> {
   List<String>listCount = [];
 
   getCount() {
-    Timer(const Duration(seconds: 0), () {
+    Timer(const Duration(seconds: 1,milliseconds: 200), () {
       getData(
           url: 'https://www.themealdb.com/api/json/v1/1/list.php?a=list')
           .then((value) {
@@ -299,82 +301,98 @@ class homeCubit extends Cubit<homeStates> {
 
 
 
-
-//dataBase
   Database? db ;
-  List<Map> archivedData = [];
-
+  List<Map> saveData = [];
+clearItem(index){
+  saveData.removeAt(index);
+  emit(initialState());
+}
   void createDatabase() async {
     db = await openDatabase(
-        'food.db',
+        'FOOD.db',
         version: 1,
         onCreate: (database,version)
         {
-          database.execute("CREATE TABLE food (id INTEGER PRIMARY KEY, idMeal TEXT)").then((value)
+          database.execute("CREATE TABLE FOOD (idMeal TEXT, strMealThumb TEXT,strMeal TEXT,condition TEXT)").then((value)
           {
             emit(CreateDatabaseState());
-            print("food Table created successfully");
+            print("News Table created successfully");
           }).catchError((e)=>print("error during create table"));
         },
         onOpen: (database)
         {
           // get Data from Database Method & emit()
           getDatabase(database);
-          print("Food.db opened successfully");
+          print("News.db opened successfully");
         }
     );
   }
-  // 2. Insert Data to news table
-  Future<void> InsertTODatabase({
-    required String idMeal
+
+  // 2. Insert Data to food table
+  Future<void> InsertTODatabase(context,{
+    required String idMeal,
+    required String thumbnail,
+    required String textDesc,
   })
   async {
-    await db?.transaction((txn) async {
-      txn.rawInsert('INSERT INTO food(idMeal) VALUES ("$idMeal")');
-    }).then((val)
-    {
-      emit(InsertToDatabaseState());
-      print("Data was inserted to Database are => $val");
-      getDatabase(db!);
-    }).catchError((e) {
-      debugPrint("Error during insert to Database, reason is $e");
-    });
+    print('......................'+idMeal.toString());
+    print('......................'+thumbnail.toString());
+    print('......................'+textDesc.toString());
+    try{
+
+      await db?.transaction((txn) async {
+        txn.rawInsert('INSERT INTO FOOD(idMeal,strMealThumb,strMeal) VALUES ("$idMeal","$thumbnail","$textDesc")').
+        whenComplete((){
+          print('...........................................');
+          print("Data was inserted to Database where idMeal is .............$idMeal");
+          showSnackBar(
+            context,"item added to Favourite successfully",
+            backgroundColor: Colors.green,
+          );
+          getDatabase(db!);
+        });
+
+
+      });
+
+    }catch (e){
+      print('sssssssssssssssssssssssssssssssssssssssssssss');
+      print(e.toString());
+    }
+
+    emit(InsertToDatabaseState());
   }
 
   // 3. get Data form Database
-  Future getDatabase(Database database)
+  Future getDatabase(Database database,)
   {
-    return database.rawQuery("SELECT * FROM food").then((value)
+    // saveData.clear();
+    return database.rawQuery("SELECT * FROM FOOD").then((value)
     {
-      archivedData = value;
+      saveData=value;
+      print('$value'.toString());
       emit(GetDataFromDatabaseState());
-    }).catchError((e)=>debugPrint("error during get data from database"));
+    }).catchError((e)=>print("error during get data from database"));
   }
-  // 4. delete item from database
-  Future<void> DeleteDatebase({required int id}) async {
-    db?.rawUpdate(
-        'DELETE FROM food WHERE id = ?',
-        [id]
-    ).then((value)
-    {
-      emit(DeletedItemFromDatabaseState());
+
+   Future<void>DeleteDatebase(context,{required String id}) async{
+    try{
+      await db?.rawUpdate(
+          'DELETE FROM FOOD WHERE idMeal = ?',
+          [id]
+      ).whenComplete((){
+        print('deleted..................................  $id');
+        showSnackBar(
+          context,"item Deleted Successfully" ,
+        );
+      });
       getDatabase(db!);
-    }).catchError((e)=>print(e.toString()));
-  }
-
-  List<String>favData=[];
-  List<dynamic>fav=[];
-  getFavData(){
-    favData=List.generate(archivedData.length, (index) =>archivedData[index]['idMeal']);
-      emit(initialState());
-      fav=List.generate(archivedData.length, (index) => {'meals',getMealId(favData[index])});
-
-    emit(initialState());
+    }catch (e){
+      print('.....................');
+      print(e.toString());
+    }
 
   }
-
-
-
 
 
 }
@@ -388,3 +406,72 @@ Future<Response> getData({
     url,
   );
 }
+
+// Database? db ;
+// List<Map> archivedData = [];
+//
+// void createDatabase() async {
+//   db = await openDatabase(
+//       'FOOD.db',
+//       version: 1,
+//       onCreate: (database,version)
+//       {
+//         database.execute("CREATE TABLE FOOD (id INTEGER PRIMARY KEY, idMeal TEXT)").then((value)
+//         {
+//           emit(CreateDatabaseState());
+//           print("News Table created successfully");
+//         }).catchError((e)=>print("error during create table"));
+//       },
+//       onOpen: (database)
+//       {
+//         // get Data from Database Method & emit()
+//         getDatabase(database);
+//         print("News.db opened successfully");
+//       }
+//   );
+// }
+//
+// // 2. Insert Data to news table
+// Future<void> InsertTODatabase(context,{
+//   required String idMeal
+// })
+// async {
+//   await db?.transaction((txn) async {
+//     txn.rawInsert('INSERT INTO FOOD(idMeal) VALUES ("$idMeal")').whenComplete((){
+//       print("Data was inserted to Database are => $idMeal");
+//       showSnackBar(
+//         context,"item added to Favourite successfully",
+//         backgroundColor: Colors.green,
+//       );
+//       getDatabase(db!);
+//     });
+//   });
+//   emit(InsertToDatabaseState());
+// }
+//
+// // 3. get Data form Database
+// Future getDatabase(Database database,)
+// {
+//   return database.rawQuery("SELECT * FROM FOOD").then((value)
+//   {
+//     archivedData = value;
+//     emit(GetDataFromDatabaseState());
+//   }).catchError((e)=>debugPrint("error during get data from database"));
+// }
+// // 4. delete item from database
+// DeleteDatebase(context,{required String id}) async{
+//   try{
+//     await db?.rawUpdate(
+//         'DELETE FROM FOOD WHERE idMeal = ?',
+//         [id]
+//     ).whenComplete((){
+//       print('deleted..................................  $id');
+//       showSnackBar(
+//         context,"item Deleted Successfully" ,
+//       );
+//     });
+//   }catch (e){
+//     print(e.toString());
+//   }
+//
+// }

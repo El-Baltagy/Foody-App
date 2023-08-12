@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
-import '../color.dart';
+import 'app_color.dart';
 
    final lightTheme = ThemeData(
       brightness: Brightness.light,
@@ -63,8 +63,10 @@ extension ThemeExtras on ThemeData {
       : Colors.white24;
   Color get textColor2 => brightness == Brightness.light
       ?  Colors.black
-      : Colors
-      .white;
+      : Colors.white;
+  Color get textColor3 => brightness == Brightness.light
+      ?  Colors.grey
+      : Colors.white;
 
   Color get shadow => brightness == Brightness.light
       ?  Color.fromARGB(76, 0, 0, 0)

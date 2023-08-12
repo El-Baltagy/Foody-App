@@ -1,10 +1,12 @@
 import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:foody/shared/manager/color.dart';
-import '../../screens/meals_by_cats/MealsBy_part_Screen.dart';
-import '../components.dart';
+import '../../screens/minor_Sc/meals_sc/MealsBy_sc.dart';
+import '../manager/app_color.dart';
+import '../manager/app_methods.dart';
+import 'empty_data.dart';
 
 
 class ItemShapePart extends StatelessWidget {
@@ -17,8 +19,8 @@ class ItemShapePart extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(right:8,bottom: 135),
+    return listPart.isNotEmpty?Padding(
+      padding:  const EdgeInsets.symmetric(horizontal:8 ).copyWith(bottom: 5.h,top: 15.h),
       child: AnimationLimiter(
         child: GridView.count(
           crossAxisCount: 3,
@@ -29,11 +31,11 @@ class ItemShapePart extends StatelessWidget {
                 position: index,
                 columnCount: 3,
                 child: ScaleAnimation(
-                  duration: Duration(milliseconds: 2000),
+                  duration: const Duration(milliseconds: 2000),
                   child: FadeInAnimation(
                     child: GestureDetector(
                       onTap: () {
-                        GoPage().pushNavigation(context, path:
+                        GoPage.push(context, path:
                         filterTypeArea? MealsByAreaScreen(
                           areaName:listPart[index].toString() ,
                         ):
@@ -70,55 +72,7 @@ class ItemShapePart extends StatelessWidget {
         ),
       ),
 
-
-      // GridView.builder(
-      //   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-      //     crossAxisCount: 3,
-      //     mainAxisSpacing: 8,
-      //     crossAxisSpacing: 10,
-      //   ),
-      //   physics: const BouncingScrollPhysics(),
-      //   // shrinkWrap: true,
-      //   scrollDirection: Axis.vertical,
-      //   itemCount: AreaList.isNotEmpty ? AreaList.length : 15,
-      //   itemBuilder: (context, index) {
-      //     return
-      //       GestureDetector(
-      //       onTap: () {
-      //         Navigator.push(
-      //             context,
-      //             MaterialPageRoute(
-      //               builder: (context) => MealsByCategotrieScreen(
-      //                 isCat: isCAt,
-      //                 categoryname: AreaList[index].toString(),
-      //                 filterType: filterType,
-      //               ),
-      //             ));
-      //       },
-      //       child: Container(
-      //         padding:
-      //         const EdgeInsets.symmetric(vertical: 5, horizontal: 5),
-      //         margin: const EdgeInsets.only(left: 10, top: 5, bottom: 5),
-      //         alignment: Alignment.center,
-      //         decoration: BoxDecoration(
-      //           borderRadius: BorderRadius.circular(40),
-      //           color: bkg,
-      //         ),
-      //         child: AutoSizeText(
-      //           AreaList[index].toString(),
-      //           maxLines: 3,
-      //           textAlign: TextAlign.center,
-      //           overflow: TextOverflow.ellipsis,
-      //           style:  TextStyle(
-      //             color: Theme.of(context).scaffoldBackgroundColor,
-      //             fontSize: 13,
-      //             fontWeight: FontWeight.w600,
-      //           ),
-      //         ),
-      //       ),
-      //     );
-      //   },
-      // ),
-    );
+    ):
+    const emptyDataItem();
   }
 }

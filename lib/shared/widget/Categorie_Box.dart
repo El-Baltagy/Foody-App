@@ -1,7 +1,7 @@
 // import 'package:flutter/material.dart';
 // import '../../controller/Categorie_Data.dart';
 // import '../../model/Categorie_Modal.dart';
-// import '../../screens/4-home/content_sc/MealsBy_part_Screen.dart';
+// import '../../screens/4-home/content_sc/MealsBy_sc.dart';
 //
 // class CategorieBox extends StatelessWidget {
 //   const CategorieBox({

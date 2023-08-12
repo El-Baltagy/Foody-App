@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foody/screens/cubit/cubit.dart';
-import 'package:foody/screens/cubit/states.dart';
-import '../../manager/color.dart';
+import '../../../controller/cubit/home/cubit.dart';
+import '../../../controller/cubit/home/states.dart';
+import '../../manager/app_assets.dart';
+import '../../manager/app_color.dart';
 import 'home_drawer.dart';
 
 class DrawerUserController extends StatefulWidget {
   const DrawerUserController({
     Key? key,
-    this.drawerWidth = 250,
+    this.drawerWidth = 100,
     this.onDrawerCall,
     this.screenView,
     this.animatedIconData = AnimatedIcons.arrow_menu,
@@ -128,29 +129,33 @@ class _DrawerUserControllerState extends State<DrawerUserController>
             ),
           ),
         ),
-        title: Text(
+        title:
+        // Image.asset(AppAsset.logo,
+        // height: 1.25.h,
+        // )
+        Text(
             'Foody App',
             textAlign: TextAlign.center,
             style: Theme.of(context).textTheme.bodySmall!.copyWith(
                 fontSize: 26,color: primaryColor,fontFamily: 'James Stroker',
               letterSpacing: 2,height: 1.25.h
-            )),
-        centerTitle: true,
+            ))
+        , centerTitle: true,
         actions: [
           Padding(
             padding:  EdgeInsets.only(right: 15.0.w),
             child: BlocBuilder<homeCubit,homeStates>(
               builder: (context, state) {
                 final cubit=homeCubit.getInstance(context);
-                return cubit.currentIndex==0?
+                return cubit.currentIndex==0||cubit.currentIndex==4?
                 InkWell(
                   borderRadius:
                   BorderRadius.circular(5),
+                  onTap: cubit.gridTab,
                   child: Icon(
                     cubit.multiple ? Icons.dashboard : Icons.view_agenda,
                     color: primaryColor,
-                  ),
-                  onTap: cubit.gridTab
+                  )
                 )
                     :Container();
               },
@@ -163,6 +168,7 @@ class _DrawerUserControllerState extends State<DrawerUserController>
         scrollDirection: Axis.horizontal,
         physics: const PageScrollPhysics(parent: PageScrollPhysics()),
         child: SingleChildScrollView(
+          physics: NeverScrollableScrollPhysics(),
           child: Column(
             children: [
 

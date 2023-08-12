@@ -1,15 +1,16 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foody/screens/cubit/cubit.dart';
-import 'package:foody/screens/cubit/states.dart';
-import 'package:foody/screens/favourite/fav.dart';
-import 'package:foody/shared/components.dart';
-import 'package:foody/shared/manager/color.dart';
-import 'package:foody/shared/manager/theme/app_theme.dart';
+import 'package:foody/shared/manager/app_color.dart';
+import 'package:foody/shared/manager/app_theme.dart';
+import 'package:shimmer/shimmer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../../controller/cubit/home/cubit.dart';
+import '../../../controller/cubit/home/states.dart';
+import '../../../controller/cubit/theme/theme_cubit.dart';
+import '../../../controller/cubit/theme/theme_state.dart';
+import '../../manager/app_assets.dart';
 
-import '../../manager/theme/cubit/theme_cubit.dart';
-import '../../manager/theme/cubit/theme_state.dart';
 
 
 class HomeDrawer extends StatefulWidget {
@@ -38,7 +39,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: Column(
-        mainAxisSize: MainAxisSize.min,
+        // mainAxisSize: MainAxisSize.min,
         // crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisAlignment: MainAxisAlignment.start,
         children: <Widget>[
@@ -62,22 +63,6 @@ class _HomeDrawerState extends State<HomeDrawer> {
           const SizedBox(
             height:15,
           ),
-      //      ListTile(
-      //         leading: Icon(Icons.favorite,
-      //       color:primaryColor),
-      //       title:  Text(
-      //     'Favourite',
-      //     style: TextStyle(
-      //       fontWeight: FontWeight.w600,
-      //       fontSize: 15,
-      //       color:Theme.of(context).textColor1 ,
-      //     ),
-      //     textAlign: TextAlign.left,
-      //   ),
-      //        onTap: (){
-      //          GoPage().pushNavigation(context, path: FavScreen());
-      //        },
-      // ),
           Divider(
             height: 2,thickness: 2,
             color: primaryColor.withOpacity(0.6),
@@ -138,8 +123,64 @@ class _HomeDrawerState extends State<HomeDrawer> {
 
           ),
           const SizedBox(
-            height: 360,
-          )
+            height: 80,
+          ),
+          GestureDetector(
+              onTap: ()async{
+                await launch(
+                  'https://el-baltagy.netlify.app/#/',
+                  forceSafariVC:
+                  false,
+                  // false : lunching your url in another Browser of iOS
+                  forceWebView:
+                  false,
+                  //  false :lunching your url in another Browser of Android
+                  enableJavaScript: true, // Android
+                );
+              },
+            child: ListTile(
+                leading: Image.asset(AppAsset.myPersonallogo),
+                title:  Padding(
+                  padding: const EdgeInsets.only(left:15),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Shimmer.fromColors(
+                        highlightColor:Colors.red ,
+                        // baseColor: Theme.of(context).textColor3,
+                        baseColor: Colors.transparent,
+                        child: Text("MADE WITH ❤️ BY",
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 14,
+                          ),
+                          textAlign: TextAlign.left,),
+                      ),
+                      Text("EL-BALTAGY",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          color:primaryColor,
+                        ),
+                        textAlign: TextAlign.left,),
+                      Text("SEE MORE!!",
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                          decoration: TextDecoration.underline,
+                          color:primaryColor,
+                        ),
+                        textAlign: TextAlign.left,)
+                    ],
+                  ),
+                )
+            ),
+          ),
+          const SizedBox(
+            height: 180,
+          ),
+
+
 
         ],
       ),
@@ -157,6 +198,11 @@ class _HomeDrawerState extends State<HomeDrawer> {
         index: DrawerIndex.Help,
         labelName: 'Components',
         icon: const Icon(Icons.settings_input_component_sharp)
+      ),
+      DrawerList(
+          index: DrawerIndex.fav,
+          labelName: 'Favorites',
+          icon: const Icon(Icons.heart_broken)
       ),
       DrawerList(
         index: DrawerIndex.FeedBack,
@@ -264,6 +310,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
 
   Future<void> navigationtoScreen(DrawerIndex indexScreen) async {
     widget.callBackIndex!(indexScreen);
+
   }
 
 }
@@ -271,6 +318,7 @@ class _HomeDrawerState extends State<HomeDrawer> {
 enum DrawerIndex {
   HOME,
   FeedBack,
+  fav,
   Help,
   Share,
 

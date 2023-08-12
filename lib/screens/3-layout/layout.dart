@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foody/shared/manager/color.dart';
-import 'package:foody/shared/manager/theme/app_theme.dart';
-import '../../shared/manager/string.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:foody/shared/manager/app_theme.dart';
+import 'package:lottie/lottie.dart';
+import '../../controller/cubit/home/cubit.dart';
+import '../../controller/cubit/home/states.dart';
+import '../../shared/manager/app_color.dart';
+import '../../shared/manager/app_string.dart';
 import '../../shared/widget/custom_drawer/drawer_user_controller.dart';
 import '../../shared/widget/custom_drawer/home_drawer.dart';
-import '../cubit/cubit.dart';
-import '../cubit/states.dart';
 import 'package:sliding_clipped_nav_bar/sliding_clipped_nav_bar.dart';
+import 'package:badges/badges.dart' as badges;
 
 class LayOut extends StatefulWidget {
   const LayOut({Key? key}) : super(key: key);
@@ -21,6 +24,7 @@ class _LayOutState extends State<LayOut> {
   @override
   Widget build(BuildContext context) {
 
+
     return BlocBuilder<homeCubit,homeStates>(
       builder: (context, state) {
         final S=MediaQuery.of(context).size;
@@ -28,7 +32,40 @@ class _LayOutState extends State<LayOut> {
         return Scaffold(
           appBar: AppBar(
             toolbarHeight: 1,backgroundColor: Colors.transparent,elevation: 0,
+
           ),
+          floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+          floatingActionButton: badges.Badge(
+
+              showBadge: cubit.saveData.isEmpty ? false : true,
+              alignment: AlignmentDirectional.bottomEnd,
+              stackFit: StackFit.loose,
+              badgeColor: Theme.of(context).scaffoldBackgroundColor,
+              badgeContent: Text(
+                cubit.saveData.length.toString(),
+                style: const TextStyle(
+                    fontSize: 22,
+                    color: primaryColor,
+                    fontWeight: FontWeight.w600),
+              ),
+              child: InkWell(
+                  onTap: () {
+                    cubit.changeBottom(4);
+                  },
+                  child: ColorFiltered(
+                    colorFilter: ColorFilter.mode(
+                        cubit.currentIndex==4?Colors.transparent:Colors.grey,
+                        BlendMode.srcATop),
+                    child: Lottie.asset('assets/animation_love.json',
+                        // width: 35,
+                        height: 40.h,
+                        fit: BoxFit.cover,
+                        // frameRate: FrameRate(60),
+                        repeat: true,
+                        alignment: AlignmentDirectional.center
+                    ),
+                  ))),
+
           body:DrawerUserController(
             screenIndex: cubit.drawerIndex,
             drawerWidth: S.width * 0.75,
@@ -38,9 +75,7 @@ class _LayOutState extends State<LayOut> {
             },
             screenView: cubit.pages[cubit.currentIndex],
           ),
-          // cubit.pages[cubit.currentIndex] ,
-          bottomNavigationBar:
-          cubit.isColorful
+          bottomNavigationBar: cubit.isColorful
               ? SlidingClippedNavBar.colorful(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             onButtonPressed: (index) {
@@ -54,6 +89,7 @@ class _LayOutState extends State<LayOut> {
             backgroundColor:Theme.of(context).scaffoldBackgroundColor,
             onButtonPressed: (index) {
               cubit.changeBottom(index);
+
             },
             iconSize: 30,
             activeColor: primaryColor,
@@ -69,8 +105,8 @@ class _LayOutState extends State<LayOut> {
     return List<BarItem>.generate(
         NavBarUtils.names.length,
             (index) => BarItem(icon:NavBarUtils.icons[index] ,title:NavBarUtils.names[index],
-              activeColor: NavBarUtils.activeColor[index],inactiveColor: NavBarUtils.unActiveColor[index]
-            )
+            activeColor: NavBarUtils.activeColor[index],inactiveColor: NavBarUtils.unActiveColor[index]
+        )
     );
   }
   List<BarItem> buildList2() {
@@ -79,18 +115,6 @@ class _LayOutState extends State<LayOut> {
             (index) => BarItem(icon:NavBarUtils.icons[index] ,title:NavBarUtils.names[index])
     );
   }
-  // List<GButton> buildList() {
-  //   return List<GButton>.generate(
-  //       NavBarUtils.names.length,
-  //           (index) => GButton(icon:NavBarUtils.icons[index] ,text:NavBarUtils.names[index])
-  //   );
-  // }
-  // List<FloatingNavbarItem> buildListe() {
-  //   return List<FloatingNavbarItem>.generate(
-  //       NavBarUtils.names.length,
-  //           (index) => FloatingNavbarItem(icon:NavBarUtils.icons[index] ,title:NavBarUtils.names[index])
-  //   );
-  // }
 
 }
 

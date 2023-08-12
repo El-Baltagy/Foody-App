@@ -1,28 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foody/screens/cubit/cubit.dart';
-import 'package:foody/shared/components.dart';
-import 'package:foody/shared/manager/theme/app_theme.dart';
+import 'package:foody/shared/manager/app_theme.dart';
+import 'package:foody/shared/widget/restart.dart';
+import 'package:lottie/lottie.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../shared/manager/color.dart';
-import '../../shared/manager/string.dart' as key;
-import '../cubit/states.dart';
-import '../meals_by_cats/MealsBy_part_Screen.dart';
+
+import '../../../controller/cubit/home/cubit.dart';
+import '../../../controller/cubit/home/states.dart';
+import '../../../shared/manager/app_assets.dart';
+import '../../../shared/manager/app_color.dart';
+import '../../../shared/manager/app_methods.dart';
+import '../../../shared/manager/app_string.dart' as key;
+import '../../../shared/network/local/cash_helper.dart';
+import '../../3-layout/layout.dart';
+import '../meals_sc/MealsBy_sc.dart';
 
 
-class MealDetailScreen extends StatelessWidget {
+
+
+class MealDetailScreen extends StatefulWidget {
   const MealDetailScreen({Key? key, required this.MealID}) : super(key: key);
   final String MealID;
 
   @override
+  State<MealDetailScreen> createState() => _MealDetailScreenState();
+}
+
+
+class _MealDetailScreenState extends State<MealDetailScreen> {
+late bool isFav;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    print('............................');
+    print(widget.MealID);
+    BlocProvider.of<homeCubit>(context).getMealId(widget.MealID);
+    isFav=CashHelper.getBoolean(key: '${widget.MealID} isSaved')??false;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => homeCubit()..getMealId(MealID),
-      child: BlocBuilder<homeCubit,homeStates>(
+    return BlocBuilder<homeCubit,homeStates>(
         builder: (context, state) {
           final cubit=homeCubit.getInstance(context);
+          changeData()async{
+            if (!isFav) {
+              CashHelper.saveData(key: '${widget.MealID} isSaved', value: true);
+              cubit.InsertTODatabase(context,
+                  idMeal: widget.MealID.toString(),
+                  thumbnail: cubit.listId[0][key.urlImage],
+                  textDesc:  cubit.listId[0][key.title]);
+
+            }else{
+
+              CashHelper.saveData(key: '${widget.MealID} isSaved', value: false);
+              await cubit.DeleteDatebase(context,id:widget.MealID);
+
+            }
+            setState(() {
+              isFav=CashHelper.getBoolean(key: '${widget.MealID} isSaved')!;
+            });
+          }
           return Scaffold(
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             appBar: AppBar(
@@ -98,7 +139,7 @@ class MealDetailScreen extends StatelessWidget {
                                           children: [
                                             GestureDetector(
                                               onTap: () {
-                                                GoPage().pushNavigation(context,path:
+                                                GoPage.push(context,path:
                                                     MealsByCatScreen(
                                                       isCat: true,
                                                       categoryname: cubit.listId[0][key.strCategory],
@@ -129,7 +170,7 @@ class MealDetailScreen extends StatelessWidget {
                                             ),
                                             GestureDetector(
                                               onTap: () {
-                                                GoPage().pushNavigation(context,path:
+                                                GoPage.push(context,path:
                                                     MealsByAreaScreen(
                                                       areaName: cubit.listId[0][key.strArea],
                                                     ));
@@ -204,7 +245,7 @@ class MealDetailScreen extends StatelessWidget {
                                         padding:  EdgeInsets.symmetric(vertical: 5.0.h),
                                               child: Row(
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     ' - ',
                                                     style: TextStyle(
                                                       color: primaryColor,
@@ -281,7 +322,7 @@ class MealDetailScreen extends StatelessWidget {
                                               ),
                                               Row(
                                                 children: [
-                                                  Text(
+                                                  const Text(
                                                     ' - '  ,
                                                     style: TextStyle(
                                                       color: primaryColor,
@@ -315,56 +356,112 @@ class MealDetailScreen extends StatelessWidget {
                       ],
                     )
                         : Container(),
-                const ArrowBackButton(),
+
+                //up row
+                Positioned(
+                  top: 50.h,
+                  left: 20.w,
+                  child: Row(
+
+                    children: [
+                      Container(
+                        width: 40.w,
+                        height: 40.h,
+                        decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(10),
+                            color: primaryColor,
+                            boxShadow:  [
+                              BoxShadow(
+                                offset: Offset(2.h, 2.w),
+                                blurRadius: 1,
+                                color: const Color.fromARGB(82, 0, 0, 0),
+                              )
+                            ]),
+                        child: IconButton(
+                          onPressed: () {
+                            // Navigator.of(context).pop();
+                            GoPage.pushReplacement(context, path: LayOut());
+                          },
+                          icon: const Icon(
+                            Icons.arrow_back,
+                            size: 20,
+                          ),
+                          color: Theme.of(context).scaffoldBackgroundColor,
+                        ),
+                      ),
+                      SizedBox(
+                        width: MediaQuery.of(context).size.width*0.6,
+                      ),
+                      Stack(
+                        alignment: AlignmentDirectional.bottomEnd,
+                        fit: cubit.multiple?StackFit.loose:StackFit.passthrough,
+                        children: [
+                          Padding(
+                            padding:  const EdgeInsets.only(bottom: 0,right:30),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                if (isFav)
+                                  ColorFiltered(
+                                    colorFilter: ColorFilter.mode(
+                                        Colors.red, BlendMode.srcATop),
+                                    child: Lottie.asset(AppAsset.lovsStack,
+                                        fit: BoxFit.cover,width: 35,height: 40,
+                                        repeat: true,frameRate: FrameRate(60),alignment: AlignmentDirectional.center
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                          Padding(
+                            padding:EdgeInsets.only(bottom: 0,right:cubit.multiple?10:0),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              crossAxisAlignment: CrossAxisAlignment.end,
+                              children: [
+                                Container(
+                                  width: 40.w,
+                                  height: 40.h,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      color: primaryColor,
+                                      boxShadow:  [
+                                        BoxShadow(
+                                          offset: Offset(2.h, 2.w),
+                                          blurRadius: 1,
+                                          color: const Color.fromARGB(82, 0, 0, 0),
+                                        )
+                                      ]),
+                                  child: IconButton(
+                                    icon: Icon(isFav?Icons.favorite:Icons.heart_broken_outlined,
+                                      color:isFav?Colors.red:Theme.of(context).scaffoldBackgroundColor ,),
+                                    onPressed: (){
+                                      changeData();
+                                    },
+                                  ),
+                                )
+
+                              ],
+                            ),
+                          ),
+
+                        ],
+                      )
+
+                    ],
+                  ),
+                )
+
               ],
             ),
           );
         },
-      ),
-    );
+      );
   }
 }
 
-
-
-
-class ArrowBackButton extends StatelessWidget {
-  const ArrowBackButton({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: 50.h,
-      left: 20.w,
-      child: Container(
-        width: 40.w,
-        height: 40.h,
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(10),
-            color: primaryColor,
-            boxShadow:  [
-              BoxShadow(
-                offset: Offset(2.h, 2.w),
-                blurRadius: 1,
-                color: Color.fromARGB(82, 0, 0, 0),
-              )
-            ]),
-        child: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: const Icon(
-            Icons.arrow_back,
-            size: 20,
-          ),
-          color: Theme.of(context).scaffoldBackgroundColor,
-        ),
-      ),
-    );
-  }
-}
 
 class ExtraButton extends StatelessWidget {
   const ExtraButton({

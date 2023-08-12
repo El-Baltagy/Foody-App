@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:foody/shared/manager/color.dart';
+import 'package:foody/controller/cubit/home/cubit.dart';
+import 'package:foody/shared/manager/app_color.dart';
+import 'package:badges/badges.dart' as badges;
 
+import 'app_assets.dart';
 class NavBarUtils {
   static const List<String> names = [
     'Categories',
@@ -10,7 +13,7 @@ class NavBarUtils {
 
   ];
 
-  static const List<IconData> icons = [
+  static  List icons = [
     Icons.category,
     Icons.settings_input_component_sharp,
     Icons.language,
@@ -50,11 +53,11 @@ List<String>list=[
   'Goat',
 ];
 List<String>listImage=[
-  'assets/peakyblinders-platters.jpg',
-  'assets/chef7.jpg',
-  'assets/chef3.jpeg',
-  'assets/chef6.jpg',
-  'assets/chef8.jpg',
+  AppAsset.plates,
+  AppAsset.chef7,
+  AppAsset.chef3,
+  AppAsset.chef6,
+  AppAsset.chef8,
 ];
 
 String urlImage='strMealThumb';

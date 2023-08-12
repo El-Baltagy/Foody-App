@@ -1,19 +1,18 @@
-import 'dart:async';
-import 'dart:math';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:foody/shared/manager/theme/app_theme.dart';
+import 'package:foody/shared/manager/app_theme.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../../controller/Categorie_Data.dart';
+import '../../controller/get_data/Categorie_Data.dart';
 import '../../model/Categorie_Modal.dart';
-import '../../shared/components.dart';
-import '../../shared/manager/color.dart';
-import '../../shared/manager/string.dart';
-import '../cubit/cubit.dart';
-import '../cubit/states.dart';
-import '../meals_by_cats/MealsBy_part_Screen.dart';
+import '../../shared/manager/app_color.dart';
+import '../../shared/manager/app_methods.dart';
+import '../../shared/manager/app_string.dart';
+import '../../../controller/cubit/home/cubit.dart';
+import '../../../controller/cubit/home/states.dart';
+import '../../shared/widget/restart.dart';
+import '../minor_Sc/meals_sc/MealsBy_sc.dart';
 
 
 class HomeScreen extends StatefulWidget {
@@ -26,12 +25,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int current = 0;
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    BlocProvider.of<homeCubit>(context).getMealCat('Beef');
+
+  }
+  @override
   Widget build(BuildContext context) {
 
     return BlocBuilder<homeCubit,homeStates>(
       builder: (context, state) {
         final h=MediaQuery.of(context).size.height;
-        final w=MediaQuery.of(context).size.width;
+
         final cubit =homeCubit.getInstance(context);
         return
           DefaultTabController(
@@ -50,8 +56,8 @@ class _HomeScreenState extends State<HomeScreen> {
                             background: Column(
                               children: [
                                 buildCarouselSlider(),
-                                 SizedBox(
-                                  height: 5.h,
+                                SizedBox(
+                                  height: 10.h,
                                 ),
                                 AnimatedSmoothIndicator(
                                   activeIndex: current,
@@ -65,8 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     spacing: 5.0,
                                   ),
                                 ),
-                                 SizedBox(
-                                  height: 20.h,
+                                SizedBox(
+                                  height: 15.h,
                                 ),
                                 myDivider(),
                               ],
@@ -80,7 +86,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             child:  Column(
                               children: [
                                 buildTabBar(cubit: cubit),
-                                 SizedBox(
+                                SizedBox(
                                   height: 7.h,
                                 )
                               ],
@@ -90,12 +96,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                       body:
                       Padding(
-                        padding: const EdgeInsets.only(bottom: 140.0),
+                        padding:  EdgeInsets.only(bottom: 130.h),
                         child: PageView.builder(
                             physics: const BouncingScrollPhysics(),
-                          itemCount: list.length,
+                            itemCount: list.length,
                             itemBuilder: (context, index) =>
-                            MealsByCatScreen(categoryname: list[cubit.l],),
+                                MealsByCatScreen(categoryname: list[cubit.l],),
                             onPageChanged: (value) {
                               DefaultTabController.of(context).animateTo(value);
                               changData(cubit,value);
@@ -112,43 +118,43 @@ class _HomeScreenState extends State<HomeScreen> {
 
   CarouselSlider buildCarouselSlider() {
     return CarouselSlider.builder(
-                                itemCount: listImage.length,
-                                itemBuilder: (BuildContext context, int itemIndex, int i) =>
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(vertical: 10),
-                                      width: double.infinity,
-                                      decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(10),
-                                          boxShadow: const [
-                                            BoxShadow(
-                                              offset: Offset(0, 2),
-                                              blurRadius: 5,
-                                              color: Color.fromARGB(117, 0, 0, 0),
-                                            )
-                                          ],
-                                          image: DecorationImage(
-                                              fit: BoxFit.cover,
-                                              image: AssetImage(listImage[itemIndex],)
-                                          )
-                                      ) ,
-                                    ),
-                                options: CarouselOptions(
-                                  onPageChanged: ( int value,carousalChange) {
-                                    setState(() {
-                                      current= value;
-                                      print(value);
-                                    });},
-                                  viewportFraction: 0.6,
-                                  height: 200,
-                                  aspectRatio: 0.75,
-                                  autoPlay: true,
-                                  autoPlayInterval: const Duration(seconds: 4),
-                                  enlargeCenterPage: true,
-                                  autoPlayCurve: Curves.fastOutSlowIn,
-                                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                                  // enableInfiniteScroll: false,
-                                ),
-                              );
+      itemCount: listImage.length,
+      itemBuilder: (BuildContext context, int itemIndex, int i) =>
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            width: double.infinity,
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: const [
+                  BoxShadow(
+                    offset: Offset(0, 2),
+                    blurRadius: 5,
+                    color: Color.fromARGB(117, 0, 0, 0),
+                  )
+                ],
+                image: DecorationImage(
+                    fit: BoxFit.cover,
+                    image: AssetImage(listImage[itemIndex],)
+                )
+            ) ,
+          ),
+      options: CarouselOptions(
+        onPageChanged: ( int value,carousalChange) {
+          setState(() {
+            current= value;
+            print(value);
+          });},
+        viewportFraction: 0.6,
+        height: 200,
+        aspectRatio: 0.75,
+        autoPlay: true,
+        autoPlayInterval: const Duration(seconds: 4),
+        enlargeCenterPage: true,
+        autoPlayCurve: Curves.fastOutSlowIn,
+        autoPlayAnimationDuration: const Duration(milliseconds: 800),
+        // enableInfiniteScroll: false,
+      ),
+    );
   }
 
 
@@ -195,6 +201,9 @@ changData(cubit,index){
   cubit.listCat.clear();
   cubit.getMealCat( list[cubit.l]);
 }
+
+
+
 
 
 

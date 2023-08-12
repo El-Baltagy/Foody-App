@@ -1,9 +1,9 @@
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:foody/shared/manager/theme/cubit/theme_state.dart';
+import 'package:foody/controller/cubit/theme/theme_state.dart';
 
-import '../../../network/cash_helper.dart';
+import '../../../shared/network/local/cash_helper.dart';
 
 
 class ThemeCubit extends Cubit<ThemeState> {
